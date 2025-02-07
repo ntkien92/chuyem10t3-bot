@@ -1,23 +1,35 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/spf13/viper"
+	"golang.org/x/exp/rand"
 )
 
 func main() {
-	// Cấu hình Viper để đọc file config.yaml
-	viper.SetConfigName("config") // Tên file không bao gồm phần mở rộng .yaml
-	viper.SetConfigType("yaml")   // Kiểu file
-	viper.AddConfigPath(".")      // Đường dẫn chứa file (thư mục hiện tại)
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
 
-	// Đọc file config.yaml
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("Lỗi khi đọc config: %v", err)
+		log.Fatalf("Load config error: %v", err)
 	}
 
+	for {
+		runCommonBotMessage()
+
+		sleepDuration := time.Duration(rand.Intn(15)+1) * time.Minute
+		fmt.Println("Next run in:", sleepDuration)
+
+		time.Sleep(sleepDuration)
+	}
+}
+
+func runCommonBotMessage() {
 	botToken := viper.GetString("botToken")
 	chatID := int64(viper.GetInt("chatID"))
 
@@ -31,6 +43,4 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-
-	log.Println("Message sent successfully!")
 }
